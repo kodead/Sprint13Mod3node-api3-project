@@ -30,8 +30,17 @@ try {
 
 function validateUser(req, res, next) {
   // DO YOUR MAGIC
-console.log('validateUser middleware')
-next()
+  const { name } = req.body
+  if(!name || !name.trim()) {
+    res.status(400).json({
+    message: 'missing required name field',
+    })
+  } else {
+    req.name = name.trim()
+    next()
+    console.log('validateUser middleware')
+
+  }
 
 }
 function validatePost(req, res, next) {
