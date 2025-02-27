@@ -6,7 +6,7 @@ validatePost,
 } = require('../middleware/middleware')
 // You will need `users-model.js` and `posts-model.js` both
 const User = require('./users-model')
-const Posts = require('../posts/posts-model')
+const Post = require('../posts/posts-model')
 // The middleware functions also need to be required
 
 const router = express.Router();
@@ -67,18 +67,36 @@ router.delete('/:id', validateUserId, async (req, res, next) => {
   // this needs a middleware to verify user id
 });
 
-router.get('/:id/posts', validateUserId,(req, res) => {
+router.get('/:id/posts', validateUserId, async (req, res, next) => {
+    try { 
+      const result = await User.getUserPosts(req.params.id)
+      res.json(result)
+    } catch (err) {
+      next(err)
+    }
   // RETURN THE ARRAY OF USER POSTS
   console.log(req.user) 
 
   // this needs a middleware to verify user id
 });
 
-router.post('/:id/posts', validateUserId, validatePost,(req, res) => {
+router.post('/:id/posts',
+   validateUserId,
+    validatePost,
+    async (req, res, next) => {
   // RETURN THE NEWLY CREATED USER POST
+  try {
+    const result = await Post.insert({
+      user_id: req.params.id,
+      text: req.text,
+    })
+    res.status(201).json(result)
+  } catch (err) {
+    next(err) 
+  }
   // this needs a middleware to verify user id
-  console.log(req.user) 
-  console.log(req.text) 
+  console.log('==>', req.user) 
+  console.log('-->', req.text) 
   // and another middleware to check that the request body is valid
 });
 
